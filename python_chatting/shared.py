@@ -98,19 +98,19 @@ class Server:
     try:
       if command.startswith('/'):
         command = command[1:]
-        parts = command.split(' ')
+      parts = command.split(' ')
 
-        if parts[0] == 'nick':
-          new_nick = parts[1]
-          if new_nick in [c.nickname for c in self.connected_clients]:
-            client.send('[SERVER] This nickname is already taken')
-            return
-          old_nick = client.nickname
-          client.nickname = new_nick
-          client.send(f'[SERVER] Your nickname is now {new_nick}')
-          self.broadcast(
-              f'[SERVER] "{old_nick}" changed nickname to "{new_nick}"')
+      if parts[0] == 'nick':
+        new_nick = parts[1]
+        if new_nick in [c.nickname for c in self.connected_clients]:
+          client.send('[SERVER] This nickname is already taken')
           return
+        old_nick = client.nickname
+        client.nickname = new_nick
+        client.send(f'[SERVER] Your nickname is now {new_nick}')
+        self.broadcast(
+            f'[SERVER] "{old_nick}" changed nickname to "{new_nick}"')
+        return
     except:
       pass
     client.send('[SERVER] Cannot handle your last command')
