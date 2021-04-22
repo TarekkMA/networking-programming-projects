@@ -45,7 +45,7 @@ class Client:
 
 class Server:
   # static counter used for naming clients
-  client_name_counter: ClassVar[int] = 0
+  client_name_counter: int = 0
   connected_clients: List[Client] = []
   connection: socket.socket
 
