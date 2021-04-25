@@ -1,7 +1,8 @@
 from argparse import ArgumentParser
+from core.server import Server
+from core.client import Client
 from enum import Enum
 from operator import attrgetter
-from shared import Client, Server
 
 class ApplicationType(Enum):
   CLIENT = 'client'

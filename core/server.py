@@ -1,53 +1,10 @@
+from .client import Client
 import socket
-import sys
-import threading
-from typing import ClassVar, List
-
-BUFFSIZE = 1024
-ENCODING = 'utf-8'
-
-def get_host_port_from_argv():
-  if len(sys.argv) != 2:
-    print('You must pass the server port')
-    exit()
-  return 'localhost', int(sys.argv[1])
-
-class Client:
-  connection: socket.socket
-  nickname: str
-  listen_thread: threading.Thread
-
-  def __init__(self, connection: socket.socket = None, nickname: str = None) -> None:
-    if connection == None:
-      self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    else:
-      self.connection = connection
-    self.nickname = nickname
-
-  def connect(self, host, port):
-    self.connection.connect((host, port))
-    listen_thread = threading.Thread(target=Client._listen_loop, args=(self,))
-    listen_thread.start()
-    self._input_loop()
-
-  def _input_loop(self):
-    while True:
-      message = input('>')
-      self.send(message)
-
-  def _listen_loop(self):
-    while True:
-      message = self.connection.recv(BUFFSIZE).decode(ENCODING)
-      print(message)
-
-  def send(self, message):
-    if isinstance(message, str):
-      message = message.encode(ENCODING)
-    self.connection.send(message)
-
+from typing import List
+from .constants import BUFFSIZE, ENCODING
+from threading import Thread
 
 class Server:
-  # static counter used for naming clients
   client_name_counter: int = 0
   connected_clients: List[Client] = []
   connection: socket.socket
@@ -72,7 +29,7 @@ class Server:
       client = Client(client_connection, nickname)
       client.send(f'[SERVER] Your nickname is {nickname}')
       self.connected_clients.append(client)
-      threading.Thread(target=Server._client_listen_loop,
+      Thread(target=Server._client_listen_loop,
                        args=(self, client,)).start()
 
   def broadcast(self, message, exceptionList: List[Client] = []) -> None:
