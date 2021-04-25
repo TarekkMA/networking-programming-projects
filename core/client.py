@@ -6,6 +6,7 @@ class Client:
   connection: socket.socket
   nickname: str
   listen_thread: Thread
+  input_thread: Thread
 
   def __init__(self, connection: socket.socket = None, nickname: str = None) -> None:
     if connection == None:
@@ -16,9 +17,14 @@ class Client:
 
   def connect(self, host, port):
     self.connection.connect((host, port))
-    listen_thread = Thread(target=Client._listen_loop, args=(self,))
-    listen_thread.start()
-    self._input_loop()
+    self.listen_thread = Thread(target=self._listen_loop,)
+    self.input_thread = Thread(target=self._input_loop,)
+    self.listen_thread.start()
+    self.input_thread.start()
+
+  def wait(self):
+    self.input_thread.join()
+    self.listen_thread.join()
 
   def _input_loop(self):
     while True:
@@ -27,7 +33,10 @@ class Client:
 
   def _listen_loop(self):
     while True:
-      message = self.connection.recv(BUFFSIZE).decode(ENCODING)
+      recv_bytes = self.connection.recv(BUFFSIZE)
+      if recv_bytes == b'':
+        break
+      message = recv_bytes.decode(ENCODING)
       print(message)
 
   def send(self, message):
@@ -35,3 +44,6 @@ class Client:
       message = message.encode(ENCODING)
     self.connection.send(message)
 
+  def terminate(self):
+    self.connection.shutdown(socket.SHUT_RDWR)
+    self.connection.close()

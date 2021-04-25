@@ -3,6 +3,8 @@ from core.server import Server
 from core.client import Client
 from enum import Enum
 from operator import attrgetter
+import signal
+import os
 
 class ApplicationType(Enum):
   CLIENT = 'client'
@@ -34,9 +36,20 @@ if __name__ == "__main__":
   type, port = attrgetter('type', 'port')(parse_args())
   host = 'localhost'
 
+  def close_after_sigint(resource):
+    def signal_handler(sig, frame):
+      print('You pressed Ctrl+C!')
+      resource.terminate()
+      os.kill(os.getpid(), signal.SIGKILL)
+    signal.signal(signal.SIGINT, signal_handler)
+
   if type == ApplicationType.SERVER:
     server = Server()
     server.serve(host, port)
+    close_after_sigint(server)
+    server.wait()
   elif type == ApplicationType.CLIENT:
     client = Client()
     client.connect(host, port)
+    close_after_sigint(client)
+    client.wait()

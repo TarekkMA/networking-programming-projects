@@ -8,6 +8,7 @@ class Server:
   client_name_counter: int = 0
   connected_clients: List[Client] = []
   connection: socket.socket
+  client_loop_thread: Thread
 
   def __init__(self) -> None:
     self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -18,7 +19,9 @@ class Server:
   def serve(self, host, port) -> None:
     self.connection.bind((host, port))
     self.connection.listen(100)
-    self._client_loop()
+    self.client_loop_thread = Thread(target=self._client_loop)
+    self.client_loop_thread.start()
+
 
   def _client_loop(self) -> None:
     while True:
@@ -29,8 +32,9 @@ class Server:
       client = Client(client_connection, nickname)
       client.send(f'[SERVER] Your nickname is {nickname}')
       self.connected_clients.append(client)
-      Thread(target=Server._client_listen_loop,
-                       args=(self, client,)).start()
+      t = Thread(target=Server._client_listen_loop,
+             args=(self, client,))
+      t.start()
 
   def broadcast(self, message, exceptionList: List[Client] = []) -> None:
     for client in self.connected_clients:
@@ -45,7 +49,12 @@ class Server:
   def _client_listen_loop(self, client: Client) -> None:
     while True:
       try:
-        message = client.connection.recv(BUFFSIZE).decode(ENCODING)
+        recv_bytes = client.connection.recv(BUFFSIZE)
+        if recv_bytes == b'':
+          self.broadcast(f'{client.nickname} > left the chat', [client])
+          print(f'[LOG] "{client.nickname}" Left')
+          break
+        message = recv_bytes.decode(ENCODING)
         print(f'[LOG] recived "{message}" from "{client.nickname}"')
         if message.startswith('/'):
           self._handle_command(client, message)
@@ -74,3 +83,10 @@ class Server:
     except:
       pass
     client.send('[SERVER] Cannot handle your last command')
+
+  def wait(self):
+    self.client_loop_thread.join()
+
+  def terminate(self):
+    self.connection.shutdown(socket.SHUT_RDWR)
+    self.connection.close()
