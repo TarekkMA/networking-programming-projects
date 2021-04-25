@@ -17,8 +17,11 @@ class Client:
   nickname: str
   listen_thread: threading.Thread
 
-  def __init__(self, nickname: str) -> None:
-    self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  def __init__(self, connection: socket.socket = None, nickname: str = None) -> None:
+    if connection == None:
+      self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    else:
+      self.connection = connection
     self.nickname = nickname
 
   def connect(self, host, port):
