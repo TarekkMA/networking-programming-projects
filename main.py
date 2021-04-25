@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from gui.client_window import show_gui_client
 from core.server import Server
 from core.client import Client
 from enum import Enum
@@ -7,7 +8,8 @@ import signal
 import os
 
 class ApplicationType(Enum):
-  CLIENT = 'client'
+  CLIENT_CLI = 'cliclient'
+  CLIENT_GUI = 'guiclient'
   SERVER = 'server'
 
   def __str__(self):
@@ -48,8 +50,10 @@ if __name__ == "__main__":
     server.serve(host, port)
     close_after_sigint(server)
     server.wait()
-  elif type == ApplicationType.CLIENT:
+  elif type == ApplicationType.CLIENT_CLI:
     client = Client()
     client.connect(host, port)
     close_after_sigint(client)
     client.wait()
+  elif type == ApplicationType.CLIENT_GUI:
+    show_gui_client()
