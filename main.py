@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
+from gui.client_gui import GuiClient
 from cli.cli_client import CliClient
-from gui.client_window import show_gui_client
 from core.server import Server
 from core.client import Client
 from enum import Enum
@@ -57,4 +57,5 @@ if __name__ == "__main__":
         client = CliClient(Client(), host, port)
         client.start()
     elif type == ApplicationType.CLIENT_GUI:
-        show_gui_client()
+        client = GuiClient(Client(), host, port)
+        client.start()
