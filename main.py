@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from cli.cli_client import CliClient
 from gui.client_window import show_gui_client
 from core.server import Server
 from core.client import Client
@@ -53,9 +54,7 @@ if __name__ == "__main__":
         close_after_sigint(server)
         server.wait()
     elif type == ApplicationType.CLIENT_CLI:
-        client = Client()
-        client.connect(host, port)
-        close_after_sigint(client)
-        client.wait()
+        client = CliClient(Client(), host, port)
+        client.start()
     elif type == ApplicationType.CLIENT_GUI:
         show_gui_client()

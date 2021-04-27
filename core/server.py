@@ -47,14 +47,14 @@ class Server:
                 try:
                     client.send(message)
                 except:
-                    client.connection.close()
+                    client._connection.close()
                     self.connected_clients.remove(client)
                     self.broadcast(f"[SERVER] {client.nickname} is no longer connected")
 
     def _client_listen_loop(self, client: Client) -> None:
         while True:
             try:
-                recv_bytes = client.connection.recv(BUFFSIZE)
+                recv_bytes = client._connection.recv(BUFFSIZE)
                 if recv_bytes == b"":
                     self.broadcast(f"{client.nickname} > left the chat", [client])
                     print(f'[LOG] "{client.nickname}" Left')
