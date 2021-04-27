@@ -1,2 +1,2 @@
 BUFFSIZE = 1024
-ENCODING = 'utf-8'
+ENCODING = "utf-8"
